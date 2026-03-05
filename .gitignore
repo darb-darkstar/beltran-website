@@ -1,0 +1,15 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# variables
+*.tfvars
+*.auto.tfvars
+
+# editors
+.vscode/
+
+# OS
+.DS_Store
