@@ -10,3 +10,7 @@ output "cloudfront_url" {
 output "website_url" {
     value = "https://${var.subdomain}.${var.domain_name}"
 }
+
+output "website_bucket_arn" {
+    value = aws_s3_bucket.website_bucket.arn
+}

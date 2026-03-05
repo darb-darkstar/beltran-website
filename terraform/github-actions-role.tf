@@ -62,6 +62,13 @@ resource "aws_iam_policy" "github_deploy_policy" {
                     aws_s3_bucket.website_bucket.arn,
                     "${aws_s3_bucket.website_bucket.arn}/*"
                 ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "cloudfront:CreateInvalidation"
+                ],
+                "Resource": "*"     
             }
         ]
     })

@@ -28,3 +28,20 @@ variable "subdomain" {
   description = "The subdomain for the CloudFront distribution."
   default     = "www"
 }
+variable "github_repo" {
+  description = "The GitHub repository in the format 'owner/repo'."
+  type        = string
+  default     = "beltran-website"
+}
+
+variable "github_username" {
+  description = "The GitHub username or organization name."
+  type        = string
+  default     = "darb-darkstar"
+}
+
+variable "github_branch" {
+  description = "The GitHub branch to allow for deployments."
+  type        = string
+  default     = "main"
+}

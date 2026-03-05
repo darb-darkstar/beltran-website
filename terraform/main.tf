@@ -9,17 +9,17 @@ resource "aws_s3_bucket" "website_bucket" {
 resource "aws_s3_object" "index" {
     bucket = aws_s3_bucket.website_bucket.id
     key    = "index.html"
-    source = "${path.module}/index.html"
+    source = "${path.module}/../website/index.html"
     content_type = "text/html"
-    etag = filemd5("${path.module}/index.html")
+    etag = filemd5("${path.module}/../website/index.html")
 }
 
 resource "aws_s3_object" "error" {
     bucket = aws_s3_bucket.website_bucket.id
     key    = "error.html"
-    source = "${path.module}/error.html"
+    source = "${path.module}/../website/error.html"
     content_type = "text/html"
-    etag = filemd5("${path.module}/error.html")
+    etag = filemd5("${path.module}/../website/error.html")
 
 }
 
@@ -113,7 +113,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     custom_error_response {
         error_code         = 403
         response_code      = 404
-        response_page_path = "/error.html"
+        response_page_path = "/../website/error.html"
     }
 }
 
