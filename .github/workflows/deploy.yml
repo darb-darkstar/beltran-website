@@ -14,8 +14,13 @@ jobs:
       id-token: write
 
     steps:
+      - name: "Debug repo structure"
+        run: |
+          pwd
+          ls -la
+      
       - name: Get Terraform outputs
-        id: terraform-
+        id: terraform
         run: |
           cd terraform
           echo "bucket_name=$(terraform output -raw websit_bucket_name)" >> $GITHUB_OUTPUT
