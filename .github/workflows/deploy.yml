@@ -18,12 +18,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get Terraform outputs
-        id: terraform
-        run: |
-          cd terraform
-          echo "bucket_name=$(terraform output -raw websit_bucket_name)" >> $GITHUB_OUTPUT
-          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -31,6 +25,13 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ROLE}} 
       
+      - name: Get Terraform outputs
+        id: terraform
+        run: |
+          cd terraform
+          echo "bucket_name=$(terraform output -raw websit_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+
       - name: Upload website to S3
         run: |
           aws s3 sync ./website s3://${{ steps.terraform.outputs.bucket_name }} --delete
