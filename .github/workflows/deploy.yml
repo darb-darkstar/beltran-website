@@ -33,8 +33,8 @@ jobs:
       
       - name: Upload website to S3
         run: |
-          aws s3 sync ./website s3://${{ steps.terraform-outputs.outputs.bucket_name }} --delete
+          aws s3 sync ./website s3://${{ steps.terraform.outputs.bucket_name }} --delete
 
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ steps }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ steps.terraform.outputs.cloudfront_distribution_id }} --paths "/*"
