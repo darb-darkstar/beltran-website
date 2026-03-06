@@ -14,6 +14,13 @@ jobs:
       id-token: write
 
     steps:
+      - name: Get Terraform outputs
+        id: terraform-
+        run: |
+          cd terraform
+          echo "bucket_name=$(terraform output -raw websit_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -25,8 +32,8 @@ jobs:
       
       - name: Upload website to S3
         run: |
-          aws s3 sync ./website s3://${{secrets.S3_BUCKET}} --delete
+          aws s3 sync ./website s3://${{ steps.terraform-outputs.outputs.bucket_name }} --delete
 
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ steps }} --paths "/*"
