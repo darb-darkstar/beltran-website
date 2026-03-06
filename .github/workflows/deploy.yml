@@ -36,8 +36,10 @@ jobs:
         run: |
           cd terraform
           terraform init -backend=false
-          echo "bucket_name=$(terraform output -raw websit_bucket_name)" >> $GITHUB_OUTPUT
-          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          bucket_name=$(terraform output -raw websit_bucket_name)"
+          cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)
+          echo "bucken_name=$bucket_name" >> $GITHUB_OUTPUT
+          echo "cloudfront_distribution_id=$cloudfront_distribution_id" >> $GITHUB_OUTPUT
 
       - name: Debut Outputs
         run: |
