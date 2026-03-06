@@ -26,30 +26,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE}} 
       
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.5.0
-
-      - name: Get Terraform outputs
-        id: terraform
-        run: |
-          cd terraform
-          terraform init -backend=false
-          bucket_name=$(terraform output -raw websit_bucket_name)
-          cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)
-          echo "bucken_name=$bucket_name" >> $GITHUB_OUTPUT
-          echo "cloudfront_distribution_id=$cloudfront_distribution_id" >> $GITHUB_OUTPUT
-
-      - name: Debut Outputs
-        run: |
-          echo "Bucket Name: ${{ steps.terraform.outputs.bucket_name }}"
-          echo "CloudFront Distribution ID: ${{ steps.terraform.outputs.cloudfront_distribution_id }}"
-
+  
       - name: Upload website to S3
         run: |
-          aws s3 sync ./website s3://${{ steps.terraform.outputs.bucket_name }} --delete
+          aws s3 sync ./website s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ steps.terraform.outputs.cloudfront_distribution_id }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
