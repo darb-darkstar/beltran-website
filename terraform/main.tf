@@ -115,6 +115,10 @@ resource "aws_cloudfront_distribution" "cdn" {
         response_code      = 404
         response_page_path = "/../website/error.html"
     }
+
+    lifecycle {
+        prevent_destroy = true
+    }
 }
 
 resource "aws_cloudfront_distribution" "apex_redirect" {
