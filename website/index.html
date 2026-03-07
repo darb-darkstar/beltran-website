@@ -2,102 +2,219 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brad Beltran | DevOps Engineer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    background: #f5f7fa;
-    margin: 0;
-    padding: 40px;
-    color: #1f2933;
+  font-family: "Inter", sans-serif;
+  background: #f7f9fc;
+  color: #333;
+  line-height: 1.6;
 }
-.resume {
-    max-width: 900px;
-    margin: auto;
-    background: #ffffff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+
+.container {
+  width: 90%;
+  max-width: 1100px;
+  margin: auto;
 }
-h1 {
-    font-size: 36px;
-    margin-bottom: 4px;
+
+header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
 }
-h2 {
-    font-size: 20px;
-    margin-top: 32px;
-    border-bottom: 2px solid #2563eb;
-    padding-bottom: 6px;
-    color: #2563eb;
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
 }
-.subtitle {
-    font-size: 16px;
-    color: #4b5563;
+
+.nav a {
+  text-decoration: none;
+  color: #333;
+  margin-left: 20px;
+  font-weight: 500;
 }
-.contact {
-    margin-top: 8px;
-    font-size: 14px;
-    color: #374151;
+
+.hero {
+  padding: 80px 0;
+  text-align: center;
 }
-p {
-    line-height: 1.6;
-    margin: 8px 0;
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
 }
-ul {
-    padding-left: 20px;
+
+.hero p {
+  font-size: 18px;
+  color: #555;
 }
-li {
-    margin-bottom: 6px;
+
+.button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 22px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
 }
+
 .section {
-    margin-top: 24px;
+  padding: 60px 0;
 }
+
+.section h2 {
+  margin-bottom: 30px;
+  font-size: 28px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.card h3 {
+  margin-bottom: 10px;
+}
+
+.tech-list span {
+  display: inline-block;
+  background: #eef2ff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 5px;
+  font-size: 14px;
+}
+
+footer {
+  text-align: center;
+  padding: 30px 0;
+  color: #777;
+}
+
 </style>
 </head>
+
 <body>
-<div class="resume">
-<h1>Brad Beltran</h1>
-<div class="subtitle">DevOps Developer | Cloud Engineer</div>
-<div class="contact">Louisville, CO • 915.433.4401 • bradley.c.beltran@gmail.com</div>
 
-<h2>Professional Summary</h2>
-<p>Experienced AWS Cloud Certified Software Engineer with a bachelor's degree in Computer Science and over 4 years of hands-on experience in Information Technology. Proficient in multiple programming languages, with in-depth knowledge of networking and network security concepts. Extensively trained in cloud computing, storage, and automation, with a proven track record of delivering scalable and efficient solutions in the cloud. Seeking challenging developer and cloud computing roles to leverage expertise in driving successful outcomes.</p>
+<header>
+<div class="container nav">
+  <h3>Brad Beltran</h3>
+  <div>
+    <a href="#projects">Projects</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+    <a href="/resume.pdf">Resume</a>
+  </div>
+</div>
+</header>
 
-<h2>Technical Profile</h2>
-<ul>
-<li><strong>Languages:</strong> Java, SQL, Python, Terraform</li>
-<li><strong>Operating Systems:</strong> Unix, Linux, Windows</li>
-<li><strong>Tools:</strong> sed, awk, Eclipse, VIM, IntelliJ, DataDog, GitHub, BitBucket, Jira</li>
-<li><strong>Cloud:</strong> AWS (EC2, S3, RDS, Lambda, DynamoDB, CloudFormation, Route 53, SQS, KMS, CI/CD, Containers)</li>
-<li><strong>Certifications:</strong> AWS Solutions Architect – Associate (2025)</li>
-</ul>
+<section class="hero container">
+  <h1>DevOps Engineer</h1>
+  <p>I build scalable infrastructure with Terraform, AWS, and CI/CD automation.</p>
 
-<h2>Work History</h2>
-<p><strong>Family Caregiver (Sabbatical)</strong> | 06/2023 – 10/2025<br>
-Full-time caregiver while completing AWS certification and Kubernetes studies.</p>
+  <a class="button" href="#projects">View Projects</a>
+</section>
 
-<p><strong>Iris Powered by Generali – Remote</strong><br>
-DevOps Engineer | 04/2022 – 04/2023</p>
-<ul>
-<li>Designed and automated AWS infrastructure using Terraform and CloudFormation</li>
-<li>Built CI/CD pipelines using AWS CodePipeline</li>
-<li>Managed EC2, S3, RDS, Lambda, API Gateway and monitoring</li>
-<li>Implemented IAM, VPC security, and KMS best practices</li>
-</ul>
+<section id="skills" class="section container">
+  <h2>Tech Stack</h2>
 
-<p><strong>Tata Consultancy Services</strong><br>
-Technology Consultant | 09/2017 – 11/2020</p>
-<ul>
-<li>Supported Jenkins CI/CD deployments and telemetry documentation</li>
-<li>Worked with PL/SQL, MongoDB, AngularJS, and Agile teams</li>
-<li>Contributed to Hadoop-based distributed processing systems</li>
-<li>Led ColdFusion to Java modernization for DoD microservices</li>
-</ul>
+  <div class="tech-list">
+    <span>AWS</span>
+    <span>Terraform</span>
+    <span>Linux</span>
+    <span>Git</span>
+    <span>GitHub Actions</span>
+    <span>Docker</span>
+    <span>Python</span>
+    <span>Kubernetes</span>
+  </div>
+</section>
 
-<h2>Education</h2>
-<p><strong>University of Texas at San Antonio</strong><br>
-B.S. Computer Science, 2017</p>
+<section id="projects" class="section container">
+<h2>Projects</h2>
+
+<div class="grid">
+
+<div class="card">
+<h3>AWS Static Website Platform</h3>
+
+<p>
+Production-ready static website infrastructure using S3, CloudFront, Route53, and Terraform.
+Includes CI/CD deployment with GitHub Actions.
+</p>
+
+<br>
+
+<strong>Tech:</strong> AWS, Terraform, CloudFront, GitHub Actions
+
+<br><br>
+
+<a href="#">GitHub Repo</a>
 
 </div>
+
+<div class="card">
+<h3>Terraform Infrastructure Portfolio</h3>
+
+<p>
+Infrastructure-as-code project demonstrating AWS networking, automation, and deployment pipelines.
+</p>
+
+<br>
+
+<strong>Tech:</strong> Terraform, AWS, CI/CD
+
+<br><br>
+
+<a href="#">GitHub Repo</a>
+
+</div>
+
+</div>
+</section>
+
+<section id="contact" class="section container">
+<h2>Contact</h2>
+
+<p>
+Email: bradley.c.beltran@gmail.com
+</p>
+
+<p>
+GitHub: <a href="#">github.com/darb-darkstar</a>
+</p>
+
+<p>
+LinkedIn: <a href="#">linkedin.com/in/bradley-beltran</a>
+</p>
+
+</section>
+
+<footer>
+© 2026 Brad Beltran
+</footer>
+
 </body>
 </html>
