@@ -1,8 +1,7 @@
-resource "aws_iam_openid_connect_provider" "github" {
-    url = "https://token.actions.githubusercontent.com"
-    client_id_list = ["sts.amazonaws.com"]
-    thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+data "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
 }
+
 
 data "aws_iam_policy_document" "github_actions_assume_role" {
     statement {
@@ -10,7 +9,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
 
         principals {
             type        = "Federated"
-            identifiers = [aws_iam_openid_connect_provider.github.arn]
+            identifiers = [data.aws_iam_openid_connect_provider.github.arn]
         }
 
         actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -20,7 +19,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
         condition {
             test     = "StringLike"
             variable = "token.actions.githubusercontent.com:sub"
-            values   = ["repo:${var.github_username}/${var.github_repo}:ref:refs/heads/${var.github_branch}"]
+            values   = ["repo:${var.github_username}/${var.github_repo}:*"]
         }
    
         condition {
@@ -49,7 +48,11 @@ resource "aws_iam_policy" "github_deploy_policy" {
                 "Action": [
                     "s3:ListBucket"
                 ],
-                "Resource": aws_s3_bucket.website_bucket.arn
+                "Resource": [
+                    aws_s3_bucket.website_bucket.arn,
+                    "${aws_s3_bucket.website_bucket.arn}/*",
+                    "arn:aws:s3:::beltran-terraform-state"
+                ]
             },
             {
                 "Effect": "Allow",
@@ -59,8 +62,10 @@ resource "aws_iam_policy" "github_deploy_policy" {
                     "s3:ListBucket"
                 ]
                 Resource = [
+                    "${aws_s3_bucket.website_bucket.arn}/*",
                     aws_s3_bucket.website_bucket.arn,
-                    "${aws_s3_bucket.website_bucket.arn}/*"
+                    "arn:aws:s3:::beltran-terraform-state/*"
+
                 ]
             },
             {

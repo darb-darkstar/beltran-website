@@ -1,22 +1,23 @@
 resource "aws_s3_bucket" "website_bucket" {
-    bucket = "${var.environment}-${var.site_name}"
+    bucket = var.environment == "prod" ? "brad-beltran-site" : "${var.environment}-brad-beltran-site"
+    
     tags = var.tag
 }
 
 resource "aws_s3_object" "index" {
     bucket = aws_s3_bucket.website_bucket.id
     key    = "index.html"
-    source = "${path.module}/../website/index.html"
+    source = "${path.root}/../../../website/index.html"
     content_type = "text/html"
-    etag = filemd5("${path.module}/../website/index.html")
+    etag = filemd5("${path.root}/../../../website/index.html")
 }
 
 resource "aws_s3_object" "error" {
     bucket = aws_s3_bucket.website_bucket.id
     key    = "error.html"
-    source = "${path.module}/../website/error.html"
+    source = "${path.root}/../../../website/error.html"
     content_type = "text/html"
-    etag = filemd5("${path.module}/../website/error.html")
+    etag = filemd5("${path.root}/../../../website/error.html")
 
 }
 
@@ -119,6 +120,7 @@ resource "aws_cloudfront_distribution" "cdn" {
 }
 
 resource "aws_cloudfront_distribution" "apex_redirect" {
+    count = var.environment == "prod" ? 1 : 0
     enabled = true
     aliases = [var.domain_name]
 
@@ -180,7 +182,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 
 resource "aws_acm_certificate" "cert" {
     provider = aws.us-east-1
-    domain_name = "${var.domain_name}"
+    domain_name = "${var.subdomain}.${var.domain_name}"
     validation_method = "DNS"
 
     subject_alternative_names = ["${var.subdomain}.${var.domain_name}"]
