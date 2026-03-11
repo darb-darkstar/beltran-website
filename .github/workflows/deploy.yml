@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   deploy:
@@ -19,18 +20,41 @@ jobs:
         uses: actions/checkout@v4
 
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ROLE}} 
       
-
+      - name: Setup Terraform 
+        uses: hashicorp/setup-terraform@v3 
+      
+      - name: Select environment 
+        id: env 
+        run: | 
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then 
+            echo "env=production" >> $GITHUB_OUTPUT 
+          else 
+            echo "env=dev" >> $GITHUB_OUTPUT 
+          fi
   
+      - name: Terraform Init
+        run: |
+          cd terraform/environments/${{ steps.env.outputs.env}}
+          terraform init -input=false
+
+      - name: Get infra outputs
+        id: infra
+        run: |
+          cd terraform/environments/${{ steps.env.outputs.env}}
+
+          echo "bucket=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
+          echo "distribution=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+      
       - name: Upload website to S3
         run: |
-          aws s3 sync ./website s3://${{ secrets.S3_BUCKET }} --delete
-
+          aws s3 sync ./website s3://${{steps.infra.outputs.bucket}} --delete
+    
       - name: Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ steps.infra.outputs.distribution }} --paths "/*"
