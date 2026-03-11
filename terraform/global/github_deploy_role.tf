@@ -45,7 +45,7 @@ resource "aws_iam_policy" "github_deploy_policy" {
                 ],
                 "Resource": [
                     "arn:aws:s3:::brad-beltran-site",
-                    "arn:aws:s3:::dev-brad-beltran-site/*",
+                    "arn:aws:s3:::dev-brad-beltran-site",
                     "arn:aws:s3:::beltran-terraform-state"
                 ]
             },
@@ -53,8 +53,7 @@ resource "aws_iam_policy" "github_deploy_policy" {
                 "Effect": "Allow",
                 "Action": [
                     "s3:PutObject",
-                    "s3:GetObject",
-                    "s3:ListBucket"
+                    "s3:GetObject"                   
                 ]
                 Resource = [
                     "arn:aws:s3:::brad-beltran-site/*",
