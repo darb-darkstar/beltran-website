@@ -38,13 +38,18 @@ jobs:
             echo "env=dev" >> $GITHUB_OUTPUT 
           fi
   
+      - name: Terraform Init
+        run: |
+          cd terraform/environments/${{ steps.env.outputs.env}}
+          terraform init -input=false
+
       - name: Get infra outputs
         id: infra
         run: |
           cd terraform/environments/${{ steps.env.outputs.env}}
 
           echo "bucket=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
-          echo: "distribution=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "distribution=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
       
       - name: Upload website to S3
         run: |
