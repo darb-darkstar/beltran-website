@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
 
         principals {
             type        = "Federated"
-            identifiers = [data.aws_iam_openid_connect_provider.github.arn]
+            identifiers = [aws_iam_openid_connect_provider.github.arn]
         }
 
         actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
         condition {
             test     = "StringLike"
             variable = "token.actions.githubusercontent.com:sub"
-            values   = ["repo:${var.github_username}/${var.github_repo}:ref:refs/heads/*"]
+            values   = ["repo:${var.github_username}/${var.github_repo}:*"]
         }
    
         condition {
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "github_deploy_policy" {
                     "s3:ListBucket"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::brad-beltran-site/*",
+                    "arn:aws:s3:::brad-beltran-site",
                     "arn:aws:s3:::dev-brad-beltran-site/*",
                     "arn:aws:s3:::beltran-terraform-state"
                 ]
@@ -59,7 +59,7 @@ resource "aws_iam_policy" "github_deploy_policy" {
                 Resource = [
                     "arn:aws:s3:::brad-beltran-site/*",
                     "arn:aws:s3:::dev-brad-beltran-site/*",
-                    "arn:aws:s3:::beltran-terraform-state"
+                    "arn:aws:s3:::beltran-terraform-state/*"
 
                 ]
             },
