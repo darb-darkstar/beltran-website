@@ -38,11 +38,6 @@ jobs:
             echo "env=dev" >> $GITHUB_OUTPUT 
           fi
   
-      - name: Terraform Init
-        run: |
-          cd terraform/environments/${{ steps.env.outputs.env}}
-          terraform init -input=false
-
       - name: Get infra outputs
         id: infra
         run: |
