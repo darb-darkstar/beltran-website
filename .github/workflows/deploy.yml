@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   deploy:
@@ -25,12 +26,30 @@ jobs:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ROLE}} 
       
-
+      - name: Setup Terraform 
+        uses: hashicorp/setup-terraform@v3 
+      - name: Select environment 
+        id: env 
+        run: | 
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then 
+            echo "env=production" >> $GITHUB_OUTPUT 
+            echo "bucket=${terrafrom output -raw bucket_name} >> $GITHUB_OUTPUT 
+          else 
+            echo "env=dev" >> $GITHUB_OUTPUT 
+            echo "bucket=${terraform output -raw bucket_name}" >> $GITHUB_OUTPUT 
+          fi
   
       - name: Upload website to S3
         run: |
-          aws s3 sync ./website s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync ./website s3://${{steps.bucket.outputs.bucket}} --delete
 
+      - name: Get Cloudfront Distribution ID
+        id: cf
+        run: |
+          cd terraform/environments/${{steps.env.outputs.env}}
+          DIST_ID=$(terraform output -raw cloudfront_distribution_id)
+          echo "dist=$DIST_ID" >> $GITHUB_OUTPUT
+      
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} --paths "/*"
