@@ -33,7 +33,7 @@ jobs:
         run: | 
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then 
             echo "env=production" >> $GITHUB_OUTPUT 
-            echo "bucket=${terrafrom output -raw bucket_name} >> $GITHUB_OUTPUT 
+            echo "bucket=${terrafrom output -raw bucket_name}" >> $GITHUB_OUTPUT 
           else 
             echo "env=dev" >> $GITHUB_OUTPUT 
             echo "bucket=${terraform output -raw bucket_name}" >> $GITHUB_OUTPUT 
