@@ -1,15 +1,10 @@
-data "aws_iam_openid_connect_provider" "github" {
-  url = "https://token.actions.githubusercontent.com"
-}
-
-
 data "aws_iam_policy_document" "github_actions_assume_role" {
     statement {
         effect = "Allow"
 
         principals {
             type        = "Federated"
-            identifiers = [data.aws_iam_openid_connect_provider.github.arn]
+            identifiers = [aws_iam_openid_connect_provider.github.arn]
         }
 
         actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -49,8 +44,8 @@ resource "aws_iam_policy" "github_deploy_policy" {
                     "s3:ListBucket"
                 ],
                 "Resource": [
-                    aws_s3_bucket.website_bucket.arn,
-                    "${aws_s3_bucket.website_bucket.arn}/*",
+                    "arn:aws:s3:::brad-beltran-site",
+                    "arn:aws:s3:::dev-brad-beltran-site/*",
                     "arn:aws:s3:::beltran-terraform-state"
                 ]
             },
@@ -62,8 +57,8 @@ resource "aws_iam_policy" "github_deploy_policy" {
                     "s3:ListBucket"
                 ]
                 Resource = [
-                    "${aws_s3_bucket.website_bucket.arn}/*",
-                    aws_s3_bucket.website_bucket.arn,
+                    "arn:aws:s3:::brad-beltran-site/*",
+                    "arn:aws:s3:::dev-brad-beltran-site/*",
                     "arn:aws:s3:::beltran-terraform-state/*"
 
                 ]
