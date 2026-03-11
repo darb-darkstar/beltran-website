@@ -1,8 +1,5 @@
-
-
-
 resource "aws_s3_bucket" "website_bucket" {
-    bucket = var.site_name
+    bucket = "${var.environment}-${var.site_name}"
     tags = var.tag
 }
 
