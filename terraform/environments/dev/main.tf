@@ -1,15 +1,17 @@
-provider "aws" {
-    region = "us-east-1"
-}
-
 module "static_site" {
     source = "../../modules/static-site"
-    environment = "dev"
+        providers = {
+        aws           = aws
+        aws.us-east-1 = aws.us-east-1
+    }
     domain_name = "bradbeltran.com"
     subdomain = "dev"
-
-    tags {
-
-        Environment = "dev"
+    github_username = "darb-darkstar"
+    github_repo = "beltran-website"
+    github_branch = "dev"
+    environment = "dev"
+    tags = {
+        environment = "dev"
+        Project = "beltran-website"
     }
 }
