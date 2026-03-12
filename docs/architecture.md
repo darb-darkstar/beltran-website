@@ -4,7 +4,7 @@ This project deploys a static portfolio website using AWS infrastructure managed
 
 ## High Level Architecture
 
-mermaid
+```mermaid
 flowchart TD
 
 A[Developer Push] --> B[GitHub Actions CI/CD]
@@ -19,7 +19,7 @@ F --> G[CloudFront CDN]
 G --> H[Route53 DNS]
 
 H --> I[Users Access Website]
-
+```
 ## Environments
 
 Two isolated environments are managed:
