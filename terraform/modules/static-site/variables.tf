@@ -18,6 +18,10 @@ variable "tag" {
     Environment = "Dev"
   }
 }
+variable "allowed_ip_addresses" {
+  description = "A list of IP addresses allowed to access the website."
+  type        = list(string)
+}
 
 
 variable "github_repo" {

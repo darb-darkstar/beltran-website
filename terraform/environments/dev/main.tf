@@ -15,3 +15,10 @@ module "static_site" {
         Project = "beltran-website"
     }
 }
+module "waf" {
+    source = "../../modules/static-site/waf"
+
+    allowed_ip_addresses = [  
+        "YOUR_HOME_IP/32"
+        ]
+}
