@@ -1,6 +1,3 @@
-provider "aws" {
-    region = "us-east-1"
-}
 
 module "static_site" {
     source = "../../modules/static-site"
@@ -11,7 +8,7 @@ module "static_site" {
     site_name = "beltran-website"
     tag = {
         Name = "beltran-website"
-        Environment = "Dev"
+        Environment = "prod"
     }
     domain_name = "bradbeltran.com"
     subdomain = "www"
@@ -20,7 +17,7 @@ module "static_site" {
     github_branch = "main"
     environment = "prod"
     tags = {
-        environment = "dev"
+        environment = "prod"
         Project = "beltran-website"
     }
 }
