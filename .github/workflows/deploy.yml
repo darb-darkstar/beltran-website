@@ -42,7 +42,7 @@ jobs:
         run: |
           cd terraform/environments/${{ steps.env.outputs.env}}
           terraform init -input=false
-
+      
       - name: Get infra outputs
         id: infra
         run: |

@@ -50,3 +50,8 @@ variable "subdomain" {
 variable "tags" {
   type        = map(string)
 }
+variable "allowed_ips" {
+    description = "A list of IP addresses allowed to access the website."
+    type        = list(string)
+    default     = []
+}

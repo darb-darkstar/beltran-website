@@ -72,8 +72,13 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
-    depends_on = [aws_acm_certificate_validation.cert_validation]
+    depends_on = [aws_acm_certificate_validation.cert_validation,
+                   aws_wafv2_web_acl.dev_waf,
+                   aws_wafv2_web_acl.prod_waf
+    ]
     
+    web_acl_id = var.environment == "prod" ? aws_wafv2_web_acl.prod_waf[0].arn : aws_wafv2_web_acl.dev_waf[0].arn
+
     origin {
         domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
         origin_id   = "S3-${aws_s3_bucket.website_bucket.id}"
@@ -253,3 +258,124 @@ data "aws_route53_zone" "primary" {
     private_zone = false
 }
 data "aws_caller_identity" "current" {}
+
+resource "aws_wafv2_ip_set" "allowed_ips" {
+    provider = aws.us-east-1
+    name        = "${var.environment}-allowed-ips"
+    description = "IP set for ${var.environment}-${var.site_name}"
+    scope       = "CLOUDFRONT"
+    ip_address_version = "IPV4"
+    addresses = [
+        for ip in var.allowed_ips : "${ip}/32" 
+   ]       
+}
+
+resource "aws_wafv2_web_acl" "dev_waf" {
+    count = var.environment == "dev" ? 1 : 0
+    provider = aws.us-east-1
+    name        = "dev-waf"
+    description = "WAF for ${var.environment}-${var.site_name}"
+    scope       = "CLOUDFRONT"
+
+    default_action {
+        block {}
+    }
+
+    rule {
+        name     = "AllowIPs"
+        priority = 1
+
+        action {
+            allow {}
+        }
+
+        statement {
+            ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.allowed_ips.arn
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "AllowIPs"
+            sampled_requests_enabled   = true
+        }
+    }
+
+    visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "devWAF"
+        sampled_requests_enabled   = true
+    }
+}
+
+resource "aws_wafv2_web_acl" "prod_waf" {
+    count = var.environment == "prod" ? 1 : 0
+    provider = aws.us-east-1
+    name        = "prod-waf"
+    description = "WAF for ${var.environment}-${var.site_name}"
+    scope       = "CLOUDFRONT"
+
+    default_action {
+        block {}
+    }
+
+    rule {
+        name     = "AWSManagedRulesCommonRuleSet"
+        priority = 1
+
+        override_action {
+            none {}
+        }
+
+        statement {
+            managed_rule_group_statement {
+                name = "AWSManagedRulesCommonRuleSet"
+                vendor_name = "AWS"
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "CommonRuleSet"
+            sampled_requests_enabled   = true
+        }
+    }
+
+    # rule {
+    #     name = "AWSManagedBotControlRuleSet"
+    #     priority = 2
+    #     override_action {
+    #         none {}
+    #     }
+            
+    #     statement {
+    #         managed_rule_group_statement {
+    #             name = "AWSManagedBotControlRuleSet"
+    #             vendor_name = "AWS"
+
+    #             managed_rule_group_configs {
+    #                 aws_managed_rules_bot_control_rule_set {
+    #                 inspection_level = "COMMON"
+    #                 }
+    #             }
+            
+    #         }
+    #     }
+
+    #     visibility_config {
+    #         cloudwatch_metrics_enabled = true
+    #         metric_name                = "BotControl"
+    #         sampled_requests_enabled   = true
+    #     }
+        
+
+    # }
+
+    visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "prodWAF"
+        sampled_requests_enabled   = true
+    }
+}
+
