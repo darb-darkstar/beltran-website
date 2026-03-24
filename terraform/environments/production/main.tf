@@ -16,6 +16,7 @@ module "static_site" {
     github_repo = "beltran-website"
     github_branch = "main"
     environment = "prod"
+    allowed_ips = var.allowed_ips
     tags = {
         environment = "prod"
         Project = "beltran-website"

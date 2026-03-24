@@ -317,7 +317,7 @@ resource "aws_wafv2_web_acl" "prod_waf" {
     scope       = "CLOUDFRONT"
 
     default_action {
-        block {}
+        allow {}
     }
 
     rule {
@@ -372,10 +372,36 @@ resource "aws_wafv2_web_acl" "prod_waf" {
 
     # }
 
+    rule {
+        name = "RateLimit"
+        priority = 0
+
+        action {
+            block {}
+        }
+        
+        statement {
+            rate_based_statement {
+                limit = 1000
+                aggregate_key_type = "IP"
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "RateLimit"
+            sampled_requests_enabled   = true
+        }
+    }
+
+
+
     visibility_config {
         cloudwatch_metrics_enabled = true
         metric_name                = "prodWAF"
         sampled_requests_enabled   = true
     }
+
+
 }
 
