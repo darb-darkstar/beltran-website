@@ -1,3 +1,4 @@
+
 resource "aws_s3_bucket" "website_bucket" {
     bucket = var.environment == "prod" ? "brad-beltran-site" : "${var.environment}-brad-beltran-site"
     
@@ -283,7 +284,7 @@ resource "aws_wafv2_web_acl" "dev_waf" {
 
     rule {
         name     = "AllowIPs"
-        priority = 1
+        priority = 0
 
         action {
             allow {}
@@ -320,12 +321,57 @@ resource "aws_wafv2_web_acl" "prod_waf" {
         allow {}
     }
 
-    rule {
-        name     = "AWSManagedRulesCommonRuleSet"
+        rule {
+        name     = "AllowIPs"
+        priority = 0
+
+        action {
+            allow {}
+         }
+
+        statement {
+            ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.allowed_ips.arn
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "AllowIPs"
+            sampled_requests_enabled   = true
+        }
+    }
+
+        rule {
+        name = "RateLimit"
         priority = 1
 
+        action {
+            block {}
+        }
+        
+        statement {
+            rate_based_statement {
+                limit = 1000
+                aggregate_key_type = "IP"
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "RateLimit"
+            sampled_requests_enabled   = true
+        }
+    }
+
+
+
+    rule {
+        name     = "AWSManagedRulesCommonRuleSet"
+        priority = 2
+
         override_action {
-            none {}
+            count {}
         }
 
         statement {
@@ -338,6 +384,50 @@ resource "aws_wafv2_web_acl" "prod_waf" {
         visibility_config {
             cloudwatch_metrics_enabled = true
             metric_name                = "CommonRuleSet"
+            sampled_requests_enabled   = true
+        }
+    }
+
+    rule {  
+        name     = "AWSManagedRulesAmazonIpReputationList"
+        priority = 3
+
+        override_action {
+            count {}
+        }
+
+        statement {
+            managed_rule_group_statement {
+                name = "AWSManagedRulesAmazonIpReputationList"
+                vendor_name = "AWS"
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "AmazonIpReputationList"
+            sampled_requests_enabled   = true
+        }
+    }
+
+    rule {
+        name     = "AWSManagedRulesKnownBadInputsRuleSet"
+        priority = 4
+
+        override_action {
+            count {}
+        }
+
+        statement {
+            managed_rule_group_statement {
+                name = "AWSManagedRulesKnownBadInputsRuleSet"
+                vendor_name = "AWS"
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "KnownBadInputsRuleSet"
             sampled_requests_enabled   = true
         }
     }
@@ -372,27 +462,6 @@ resource "aws_wafv2_web_acl" "prod_waf" {
 
     # }
 
-    rule {
-        name = "RateLimit"
-        priority = 0
-
-        action {
-            block {}
-        }
-        
-        statement {
-            rate_based_statement {
-                limit = 1000
-                aggregate_key_type = "IP"
-            }
-        }
-
-        visibility_config {
-            cloudwatch_metrics_enabled = true
-            metric_name                = "RateLimit"
-            sampled_requests_enabled   = true
-        }
-    }
 
 
 
@@ -405,3 +474,131 @@ resource "aws_wafv2_web_acl" "prod_waf" {
 
 }
 
+resource "aws_wafv2_web_acl_logging_configuration" "prod_waf_logging" {
+    count = local.enable_waf_logging ? 1 : 0
+    depends_on = [aws_kinesis_firehose_delivery_stream.waf_logs_stream]
+    provider = aws.us-east-1
+    resource_arn = aws_wafv2_web_acl.prod_waf[0].arn
+
+    log_destination_configs = [
+        aws_kinesis_firehose_delivery_stream.waf_logs_stream[0].arn
+    ]
+
+    logging_filter {
+        default_behavior = "DROP"
+
+        filter {
+            behavior = "KEEP"
+            condition{
+                action_condition {
+                    action = "BLOCK"
+                }
+            }
+            
+            requirement = "MEETS_ANY"
+
+        }
+    }
+    redacted_fields {
+        single_header {
+            name = "authorization"
+        }
+    
+    }
+}
+
+resource "aws_s3_bucket" "waf_logs" {
+    count = local.enable_waf_logging ? 1 : 0
+    provider = aws.us-east-1
+    bucket = "${var.environment}-${var.site_name}-waf-logs"
+    acl = "private"
+
+    tags = {
+        Name = "${var.site_name}-waf-logs"
+        Environment = var.environment
+    }
+}   
+
+resource "aws_s3_bucket_versioning" "waf_logs_versioning" {
+    count = local.enable_waf_logging ? 1 : 0
+
+    provider = aws.us-east-1
+    bucket = aws_s3_bucket.waf_logs[0].id
+    versioning_configuration {
+        status = "Enabled"
+    }
+
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "waf_logs_lifecycle" {
+    count = local.enable_waf_logging ? 1 : 0
+    provider = aws.us-east-1
+    bucket = aws_s3_bucket.waf_logs[0].id
+
+    rule {
+        id = "ExpireOldLogs"
+        status = "Enabled"
+
+        expiration {
+            days = 30
+        }
+    }
+}
+
+resource "aws_iam_role" "firehose_role" {
+    provider = aws.us-east-1
+    name = "${var.environment}-waf-firehose-role"
+
+    assume_role_policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Effect = "Allow"
+                Principal = {
+                    Service = "firehose.amazonaws.com"
+                }
+                Action = "sts:AssumeRole"
+            }
+        ]
+    })
+}
+
+resource "aws_iam_role_policy" "firehose_policy" {
+    count = local.enable_waf_logging ? 1 : 0
+    provider = aws.us-east-1
+    name = "${var.environment}-waf-firehose-policy"
+    role = aws_iam_role.firehose_role.id
+
+    policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Effect = "Allow"
+                Action = [
+                    "s3:PutObject",
+                    "s3:PutObjectAcl",
+                ]
+                Resource = [
+                    aws_s3_bucket.waf_logs[0].arn,
+                    "${aws_s3_bucket.waf_logs[0].arn}/*"
+                ]
+            }
+        ]
+    })
+}
+
+resource "aws_kinesis_firehose_delivery_stream" "waf_logs_stream" {
+    count = local.enable_waf_logging ? 1 : 0
+    provider = aws.us-east-1
+    name = "aws-waf-logs-${var.environment}-${var.site_name}"
+    destination = "extended_s3"
+
+    extended_s3_configuration {
+        role_arn = aws_iam_role.firehose_role.arn
+        bucket_arn = aws_s3_bucket.waf_logs[0].arn
+        prefix = "waf/"
+        buffering_size = 5
+        buffering_interval = 60
+        compression_format = "GZIP"
+    }
+}
