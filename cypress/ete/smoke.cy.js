@@ -8,11 +8,48 @@ describe("Smoke Test - S3 Static Website", () => {
         // Check for specific content   
         cy.contains("Brad Beltran")
     
-        
-    
-    
-    
-    
+        cy.contains("DevOps Engineer");
+
+        cy.contains("Terraform, AWS, and CI/CD automation");
+
+    });
+
+    it('Navigation links are present', () => {
+        cy.visit("/");
+
+        cy.contains('Projects'),
+        cy.contains('Skills'),
+        cy.contains('Contact'),
+        cy. contains('Resume');
+
+    });
+
+    it('Project sections are present', () => {
+        cy.visit("/#projects");
+
+        cy.contains('AWS Static Website Platform'),
+        cy.contains('Terraform Infrastructure Portfolio');
+    });
+
+    it('Tech Stack is visible', () => {
+        cy.visit("/#skills");
+
+        cy.contains('AWS'),
+        cy.contains('Terraform'),
+        cy.contains('Docker'),
+        cy.contains('Kubewrnetes');
+    });
+
+    it('Contact information is visible', () => {
+        cy.visit("/#contact");
+        cy.contains('bradley.c.beltran@gmail.com'),
+        cy.contains('github.com/darbk-darkstar'); 
+    });
+
+    it('Resume link is functional', () => {
+        cy.visit("/Resume.pdf");
+        .its('status')
+        .should('eq', 200);
     });
 
     it('No Console errors', () => {
