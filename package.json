@@ -1,0 +1,26 @@
+{
+  "name": "beltran-website",
+  "version": "1.0.0",
+  "description": "Personal project to set up my website",
+  "main": "cypress.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:smoke": "cypress run --spec cypress/e2e/smoke.cy.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darb-darkstar/beltran-website.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/darb-darkstar/beltran-website/issues"
+  },
+  "homepage": "https://github.com/darb-darkstar/beltran-website#readme",
+  "devDependencies": {
+    "cypress": "^15.14.0"
+  }
+
+
+}
