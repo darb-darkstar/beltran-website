@@ -80,24 +80,31 @@ jobs:
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ steps.infra.outputs.distribution }} --paths "/*"
 
-      - name: Wait for CloudFront to be ready
+      - name: Wait for CloudFront to be ready (DEBUG)
         run: |
-          echo "Waiting for site to be ready..."
+          echo "Testing URL: $BASE_URL"
+
           for i in {1..10}; do
-            STATUS=$(curl -o /dev/null -s -w "%{http_code}" $BASE_URL)
-            if [ "$STATUS" = "200" ]; then
+            echo "Attempt $i..."
+
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $BASE_URL)
+
+            echo "HTTP Status: $RESPONSE"
+
+            if [ "$RESPONSE" = "200" ]; then
               echo "Site is ready!"
               exit 0
             fi
-            echo "Not ready yet... retrying in 10s"
+
             sleep 10
           done
-          echo "Site did not become ready in time"
-          exit 1
 
+          echo "Final check (verbose):"
+          curl -v $BASE_URL
+
+          exit 1
         env:
           BASE_URL: ${{ steps.url.outputs.base_url }}
-
 
       - name: Run Cypress Smoke Test
         run: npm run test:smoke
