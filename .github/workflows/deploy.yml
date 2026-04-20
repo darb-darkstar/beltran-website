@@ -84,6 +84,6 @@ jobs:
           exit 1
 
       - name: Run Cypress Smoke Test
-        run: npx cypress run --spec cypress/e2e/smoke.cy.js
+        run: npm run test:smoke
         env:
           BASE_URL: https://${{ steps.infra.outputs.url }}
