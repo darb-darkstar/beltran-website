@@ -70,7 +70,6 @@ jobs:
 
           echo "bucket=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
           echo "distribution=$(terraform output -raw cloudfront_distribution_id)"\   >> $GITHUB_OUTPUT
-          echo "url=$(terraform output -raw cloudfront_url)" >> $GITHUB_OUTPUT
           
       - name: Upload website to S3
         run: |
