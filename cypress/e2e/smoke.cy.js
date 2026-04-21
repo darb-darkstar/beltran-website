@@ -53,7 +53,7 @@ describe("Smoke Test - S3 Static Website", () => {
         cy.contains('AWS'),
         cy.contains('Terraform'),
         cy.contains('Docker'),
-        cy.contains('Kubewrnetes');
+        cy.contains('Kubernetes');
     });
 
     it('Contact information is visible', () => {
@@ -63,7 +63,7 @@ describe("Smoke Test - S3 Static Website", () => {
             }
         });
         cy.contains('bradley.c.beltran@gmail.com'),
-        cy.contains('github.com/darbk-darkstar'); 
+        cy.contains('github.com/darb-darkstar'); 
     });
     
     it('Resume link is functional', () => {
