@@ -26,9 +26,9 @@ resource "aws_s3_bucket_public_access_block" "set" {
     bucket = aws_s3_bucket.website_bucket.id
 
     block_public_acls       = true
-    block_public_policy     = false
+    block_public_policy     = true
     ignore_public_acls      = true
-    restrict_public_buckets = false
+    restrict_public_buckets = true
 }
 
 data "aws_iam_policy_document" "site_policy" {
@@ -117,7 +117,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     custom_error_response {
         error_code         = 403
         response_code      = 404
-        response_page_path = "/../website/error.html"
+        response_page_path = "/error.html"
     }
 
     lifecycle {
@@ -130,18 +130,15 @@ resource "aws_cloudfront_distribution" "apex_redirect" {
     enabled = true
     aliases = [var.domain_name]
 
+    default_root_object = "index.html"
+
     origin {
-        domain_name = aws_cloudfront_distribution.cdn.domain_name
-        origin_id   = "redirect-origin"
-    
-    custom_origin_config {
-        http_port              = 80
-        https_port             = 443
-        origin_protocol_policy = "https-only"
-        origin_ssl_protocols   = ["TLSv1.2"]
-    
+    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
+    origin_id   = "redirect-origin"
+
+    origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
     }
-    }
+
 
     default_cache_behavior {
         target_origin_id       = "redirect-origin"
@@ -283,8 +280,41 @@ resource "aws_wafv2_web_acl" "dev_waf" {
     }
 
     rule {
-        name     = "AllowIPs"
+        name     = "AllowCICD"
         priority = 0
+
+        action {
+            allow {}
+        }
+
+        statement {
+            byte_match_statement {
+            field_to_match {
+                single_header {
+                name = "x-ci-test"
+                }
+            }
+
+            positional_constraint = "EXACTLY"
+            search_string         = "true"
+
+            text_transformation {
+                priority = 0
+                type     = "NONE"
+            }
+            }
+        }
+
+        visibility_config {
+            cloudwatch_metrics_enabled = true
+            metric_name                = "AllowCICD"
+            sampled_requests_enabled   = true
+        }
+        }
+
+    rule {
+        name     = "AllowIPs"
+        priority = 1
 
         action {
             allow {}

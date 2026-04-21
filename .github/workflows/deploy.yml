@@ -19,6 +19,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.18.0
+      
+      - name: Install dependencies
+        run: npm ci
+
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -38,6 +46,18 @@ jobs:
             echo "env=dev" >> $GITHUB_OUTPUT 
           fi
   
+      
+      - name: Set BASE_URL
+        id: url
+        run: |
+          if [[ "${{ steps.env.outputs.env }}" == "production" ]]; then
+            echo "base_url=https://${{ secrets.CLOUDFRONT_URL_PROD }}" >> $GITHUB_OUTPUT
+          else
+            echo "base_url=https://${{ secrets.CLOUDFRONT_URL_DEV }}" >> $GITHUB_OUTPUT
+          fi
+
+
+
       - name: Terraform Init
         run: |
           cd terraform/environments/${{ steps.env.outputs.env}}
@@ -49,8 +69,8 @@ jobs:
           cd terraform/environments/${{ steps.env.outputs.env}}
 
           echo "bucket=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
-          echo "distribution=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
-      
+          echo "distribution=$(terraform output -raw cloudfront_distribution_id)"\   >> $GITHUB_OUTPUT
+          
       - name: Upload website to S3
         run: |
           aws s3 sync ./website s3://${{steps.infra.outputs.bucket}} --delete
@@ -58,3 +78,34 @@ jobs:
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ steps.infra.outputs.distribution }} --paths "/*"
+
+      - name: Wait for CloudFront to be ready (DEBUG)
+        run: |
+          echo "Testing URL: $BASE_URL"
+
+          for i in {1..10}; do
+            echo "Attempt $i..."
+
+            STATUS=$(curl -H "x-ci-test: true" -o /dev/null -s -w "%{http_code}" $BASE_URL)
+
+            echo "HTTP Status: $STATUS"
+
+            if [ "$STATUS" = "200" ]; then
+              echo "Site is ready!"
+              exit 0
+            fi
+
+            sleep 10
+          done
+
+          echo "Final check (verbose):"
+          curl -v -H "x-ci-test: true" $BASE_URL
+
+          exit 1
+        env:
+          BASE_URL: ${{ steps.url.outputs.base_url }}
+
+      - name: Run Cypress Smoke Test
+        run: npm run test:smoke
+        env:
+          BASE_URL: ${{ steps.url.outputs.base_url }}
