@@ -78,7 +78,7 @@ describe("Smoke Test - S3 Static Website", () => {
     });
 
     it('No Console errors', () => {
-        cy.visit("/". {
+        cy.visit("/", {
             headers: {
                 'x-ci-test': 'true'
             }
