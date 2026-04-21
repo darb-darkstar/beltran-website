@@ -87,11 +87,11 @@ jobs:
           for i in {1..10}; do
             echo "Attempt $i..."
 
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $BASE_URL)
+            STATUS=$(curl -H "x-ci-test: true" -o /dev/null -s -w "%{http_code}" $BASE_URL)
 
-            echo "HTTP Status: $RESPONSE"
+            echo "HTTP Status: $STATUS"
 
-            if [ "$RESPONSE" = "200" ]; then
+            if [ "$STATUS" = "200" ]; then
               echo "Site is ready!"
               exit 0
             fi
@@ -100,7 +100,7 @@ jobs:
           done
 
           echo "Final check (verbose):"
-          curl -v $BASE_URL
+          curl -v -H "x-ci-test: true" $BASE_URL
 
           exit 1
         env:
