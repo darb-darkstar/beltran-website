@@ -1,7 +1,11 @@
 describe("Smoke Test - S3 Static Website", () => { 
     it("should load the homepage", () => {
-        cy.visit("/");
-        
+        cy.visit('/', {
+            headers: {
+                'x-ci-test': 'true'
+            }
+            });
+
         // Page Rendered
         cy.get('body').should('be.visible');
 
@@ -15,7 +19,11 @@ describe("Smoke Test - S3 Static Website", () => {
     });
 
     it('Navigation links are present', () => {
-        cy.visit("/");
+        cy.visit("/", {
+            headers: {
+                'x-ci-test': 'true'
+            }
+        });
 
         cy.contains('Projects'),
         cy.contains('Skills'),
@@ -25,14 +33,22 @@ describe("Smoke Test - S3 Static Website", () => {
     });
 
     it('Project sections are present', () => {
-        cy.visit("/#projects");
+        cy.visit("/#projects", {
+            headers: {
+                'x-ci-test': 'true'
+            }
+        });
 
         cy.contains('AWS Static Website Platform'),
         cy.contains('Terraform Infrastructure Portfolio');
     });
 
     it('Tech Stack is visible', () => {
-        cy.visit("/#skills");
+        cy.visit("/#skills", {
+            headers: {
+                'x-ci-test': 'true'
+            }
+        });
 
         cy.contains('AWS'),
         cy.contains('Terraform'),
@@ -41,19 +57,33 @@ describe("Smoke Test - S3 Static Website", () => {
     });
 
     it('Contact information is visible', () => {
-        cy.visit("/#contact");
+        cy.visit("/#contact", {
+            headers: {
+                'x-ci-test': 'true'
+            }
+        });
         cy.contains('bradley.c.beltran@gmail.com'),
         cy.contains('github.com/darbk-darkstar'); 
     });
-
+    
     it('Resume link is functional', () => {
-        cy.visit("/Resume.pdf");
-        .its('status')
-        .should('eq', 200);
+    cy.request({
+        url: '/Resume.pdf',
+        headers: {
+        'x-ci-test': 'true'
+        }
+    })
+    .its('status')
+    .should('eq', 200);
     });
 
     it('No Console errors', () => {
-        cy.visit("/");
+        cy.visit("/". {
+            headers: {
+                'x-ci-test': 'true'
+            }
+        });
+        
         cy.window().then((win) => {
             cy.stub(win.console, 'error').as('consoleError');
         });
